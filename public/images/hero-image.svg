@@ -1,0 +1,40 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="400" cy="300" r="250" fill="#16213E" stroke="#7B2CBF" stroke-width="2"/>
+  
+  <!-- Controller Base -->
+  <path d="M300 300 C250 250, 550 250, 500 300 S520 400, 400 400 S280 350, 300 300" fill="#7B2CBF" stroke="#9D4EDD" stroke-width="3"/>
+  
+  <!-- D-Pad -->
+  <rect x="320" y="280" width="40" height="40" fill="#1A1A2E" rx="5"/>
+  <rect x="330" y="270" width="20" height="60" fill="#1A1A2E" rx="5"/>
+  <rect x="310" y="290" width="60" height="20" fill="#1A1A2E" rx="5"/>
+  
+  <!-- Buttons -->
+  <circle cx="460" cy="300" r="10" fill="#FF2E63"/>
+  <circle cx="440" cy="320" r="10" fill="#08D9D6"/>
+  <circle cx="480" cy="320" r="10" fill="#252A34"/>
+  <circle cx="460" cy="340" r="10" fill="#FF2E63"/>
+  
+  <!-- Analog Sticks -->
+  <circle cx="380" cy="350" r="15" fill="#252A34" stroke="#9D4EDD" stroke-width="2"/>
+  <circle cx="420" cy="350" r="15" fill="#252A34" stroke="#9D4EDD" stroke-width="2"/>
+  
+  <!-- Decorative Lines -->
+  <path d="M250 280 Q400 200 550 280" fill="none" stroke="#9D4EDD" stroke-width="2" opacity="0.5"/>
+  <path d="M250 320 Q400 400 550 320" fill="none" stroke="#9D4EDD" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Glow Effects -->
+  <circle cx="460" cy="300" r="15" fill="#FF2E63" opacity="0.3"/>
+  <circle cx="380" cy="350" r="20" fill="#9D4EDD" opacity="0.3"/>
+  
+  <!-- Particles -->
+  <g fill="#7B2CBF" opacity="0.5">
+    <circle cx="200" cy="200" r="3"/>
+    <circle cx="600" cy="200" r="3"/>
+    <circle cx="200" cy="400" r="3"/>
+    <circle cx="600" cy="400" r="3"/>
+    <circle cx="400" cy="150" r="3"/>
+    <circle cx="400" cy="450" r="3"/>
+  </g>
+</svg>

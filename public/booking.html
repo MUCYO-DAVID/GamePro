@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Now - GamePro</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="container flex">
+        <a class="logo" href="/">GamePro</a>
+        <nav class="navbar">
+          <a href="/">Home</a>
+          <a href="/games">Games</a>
+          <a class="active" href="/booking">Book Now</a>
+          <a href="/signup">Sign Up</a>
+          <a href="/signin">Sign In</a>
+        </nav>
+        <button class="mobile-menu-btn" aria-label="Open menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <section class="booking-section">
+      <div class="container">
+        <h2>Book Your Session</h2>
+        <div class="booking-container">
+          <div class="booking-info">
+            <h3>Reserve Your Gaming Session</h3>
+            <p>
+              Pick your room, choose a date and time, and tell us how many players are coming. Our team will confirm your booking.
+            </p>
+
+            <div class="booking-features">
+              <div class="feature">
+                <i class="fas fa-clock"></i>
+                <h4>Flexible Hours</h4>
+                <p>Open Daily From 10 AM To 10 PM</p>
+              </div>
+              <div class="feature">
+                <i class="fas fa-users"></i>
+                <h4>Group Bookings</h4>
+                <p>Special Rates For Groups</p>
+              </div>
+              <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h4>Safe Environment</h4>
+                <p>Clean And Supervised Gaming Area</p>
+              </div>
+            </div>
+          </div>
+
+          <form class="booking-form" id="booking-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="gameSlug">Game / Room</label>
+                <select id="gameSlug" name="gameSlug" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="date">Date & Time</label>
+                <input id="date" name="date" type="datetime-local" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Full Name</label>
+                <input id="name" name="name" type="text" placeholder="Your name" required />
+              </div>
+
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input id="phone" name="phone" type="tel" placeholder="+250..." required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address (optional)</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Number of Players</label>
+                <div class="players-wrap">
+                  <button type="button" class="player-btn" id="players-dec" aria-label="Fewer players">−</button>
+                  <span class="player-count-num" id="players-count">1</span>
+                  <button type="button" class="player-btn" id="players-inc" aria-label="More players">+</button>
+                </div>
+                <div class="player-icons-row" id="player-icons-row"></div>
+              </div>
+
+              <div class="form-group">
+                <label>Session Duration</label>
+                <div class="duration-pills" id="duration-pills">
+                  <button type="button" class="duration-pill" data-value="30 minutes">30 min</button>
+                  <button type="button" class="duration-pill active" data-value="1 hour">1 hour</button>
+                  <button type="button" class="duration-pill" data-value="1.5 hours">1.5 hrs</button>
+                  <button type="button" class="duration-pill" data-value="2 hours">2 hours</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="notes">Special Requests (optional)</label>
+              <textarea id="notes" name="notes" rows="3" placeholder="Any special requests or details..."></textarea>
+            </div>
+
+            <button class="btn" type="submit">Confirm Booking</button>
+            <p id="booking-result" style="margin-top: 12px; font-size: 1.4rem"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-bottom">
+          <p>&copy; 2024 Kigali Game Center. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/auth-ui.js"></script>
+    <script src="/js/booking.js"></script>
+  </body>
+</html>
+

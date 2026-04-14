@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - GamePro</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="container flex">
+        <a class="logo" href="/">GamePro</a>
+        <nav class="navbar">
+          <a href="/">Home</a>
+          <a href="/games">Games</a>
+          <a href="/booking">Book Now</a>
+          <a class="active" href="/signup">Sign Up</a>
+          <a href="/signin">Sign In</a>
+        </nav>
+        <button class="mobile-menu-btn" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <section class="booking-section">
+      <div class="container">
+        <h2>Create your account</h2>
+        <div class="booking-container">
+          <div class="booking-info">
+            <h3>Secure access</h3>
+            <p>Create an account to manage bookings and enable two-factor authentication.</p>
+          </div>
+
+          <form class="booking-form" id="signup-form">
+            <div class="form-group">
+              <label for="name">Name (optional)</label>
+              <input id="name" name="name" type="text" placeholder="Your name" />
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" required />
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input id="password" name="password" type="password" minlength="8" required />
+            </div>
+            <button class="btn" type="submit">Sign up</button>
+            <p id="signup-result" style="margin-top: 12px; font-size: 1.4rem"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/auth-ui.js"></script>
+    <script src="/js/signup.js"></script>
+  </body>
+</html>
+

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Bookings - GamePro</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/admin.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div class="container flex">
+        <a class="logo" href="/">GamePro</a>
+        <nav class="navbar">
+          <a href="/">Home</a>
+          <a href="/games">Games</a>
+          <a href="/booking">Book Now</a>
+        </nav>
+        <button class="mobile-menu-btn" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-hero">
+      <div class="admin-wrap">
+        <div class="admin-header">
+          <div class="admin-title">
+            <h1>Bookings</h1>
+            <p>Review, confirm, or cancel customer bookings in real time.</p>
+          </div>
+          <div class="admin-stats" id="admin-stats" aria-label="Booking stats" style="display:none">
+            <div class="stat">
+              <div class="k">Total</div>
+              <div class="v" id="stat-total">—</div>
+            </div>
+            <div class="stat">
+              <div class="k">Pending</div>
+              <div class="v" id="stat-pending">—</div>
+            </div>
+            <div class="stat">
+              <div class="k">Confirmed</div>
+              <div class="v" id="stat-confirmed">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-toolbar">
+          <div id="admin-result" class="hint">Checking access…</div>
+          <div class="actions">
+            <button class="btn btn-admin btn-ghost" id="refresh-btn" type="button">
+              <i class="fas fa-rotate-right"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <section class="admin-panel" id="admin-panel" aria-label="Bookings table" style="display:none">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width: 28%">Game</th>
+                <th style="width: 18%">When</th>
+                <th style="width: 22%">Customer</th>
+                <th style="width: 12%">Status</th>
+                <th style="width: 20%; text-align: right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookings"></tbody>
+          </table>
+          <div id="admin-empty" class="admin-empty" style="display: none">No bookings yet.</div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/auth-ui.js"></script>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>
+
