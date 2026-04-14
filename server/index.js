@@ -62,7 +62,7 @@ function setSessionCookie(res, payload) {
   res.cookie("gp_session", signSession(payload), {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 1000 * 60 * 60 * 24 * 7
   });
