@@ -6,11 +6,15 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch --env-file=.env server/index.js",
-    "start": "prisma generate && prisma db push && node server/index.js",
+    "start": "node server/index.js",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "seed": "node --env-file=.env prisma/seed.js"
+    "seed": "node --env-file=.env prisma/seed.js",
+    "copy-data": "node --env-file=.env scripts/copy-data-to-supabase.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.0",
