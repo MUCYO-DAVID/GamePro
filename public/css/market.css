@@ -1747,3 +1747,9 @@ section.mk-section,
     display: inline-flex;
   }
 }
+
+/* Show the whole product photo (no cropping of tall consoles) */
+.mk-card-img img:not(.art) {
+  object-fit: contain;
+  background: #f3f3f6;
+}

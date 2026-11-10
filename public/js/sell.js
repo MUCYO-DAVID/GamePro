@@ -188,6 +188,12 @@
              <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden id="photo-input" /></label>`
         : "");
     document.getElementById("photo-input")?.addEventListener("change", onPickPhotos);
+    box.querySelector(".mk-drop")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        document.getElementById("photo-input")?.click();
+      }
+    });
   }
 
   async function onPickPhotos(e) {

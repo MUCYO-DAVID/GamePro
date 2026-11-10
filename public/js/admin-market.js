@@ -28,6 +28,8 @@
         <div class="gp-stat"><div class="k">Open reports</div><div class="v">${ov.openReports}</div></div>
         <div class="gp-stat"><div class="k">Buyer inquiries</div><div class="v">${ov.inquiries}</div></div>
       </div>
+      <div class="admin-toolbar" style="margin:0 0 1.6rem"><div class="hint">GamePro's own products are listed from the seller dashboard, with photos.</div>
+        <div class="actions"><a class="btn btn-admin" href="/sell#new"><i class="fas fa-plus"></i> Add product</a></div></div>
       <div class="gp-tabs" role="tablist" aria-label="Marketplace management">
         <button class="gp-tab" data-sub="listings">Listings</button>
         <button class="gp-tab" data-sub="categories">Categories</button>

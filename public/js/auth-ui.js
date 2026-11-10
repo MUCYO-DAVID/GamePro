@@ -101,6 +101,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (user.isAdmin) {
       ensureLink("/admin", "Admin");
     }
+    // Signed-in users can list products straight from the menu
+    const sell = ensureLink("/sell", "Sell");
+    if (sell && location.pathname === "/sell") sell.classList.add("active");
+    const mk = nav?.querySelector('a[href="/marketplace"]');
+    if (sell && mk) mk.after(sell);
     addNotificationBell();
   } else {
     if (signup) signup.style.display = "";

@@ -14,7 +14,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "seed": "node --env-file=.env prisma/seed.js",
-    "copy-data": "node --env-file=.env scripts/copy-data-to-supabase.js"
+    "copy-data": "node --env-file=.env scripts/copy-data-to-supabase.js",
+    "seed:catalog": "node --env-file=.env scripts/seed-catalog.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.0",
