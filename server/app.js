@@ -34,7 +34,24 @@ const adminPage = path.join(__dirname, "views", "admin.html");
 
 app.use(express.static(publicDir));
 
-app.get("/health", (_req, res) => res.json({ ok: true }));
+// Reports whether the database is reachable. Only shows Prisma's error code, never connection details.
+app.get("/health", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ ok: true, db: "ok" });
+  } catch (e) {
+    console.error("[HEALTH] Database check failed:", e);
+    const msg = String(e?.message || "");
+    const hint = /Authentication failed|password authentication/i.test(msg)
+      ? "wrong database password"
+      : /Can't reach database|ENOTFOUND|tenant or user not found/i.test(msg)
+        ? "wrong database host/user"
+        : /environment variable not found|must start with the protocol/i.test(msg)
+          ? "DATABASE_URL missing or badly formatted"
+          : "unknown";
+    res.status(503).json({ ok: false, db: "error", code: e?.errorCode || e?.code || null, hint });
+  }
+});
 
 function getSessionSecret() {
   const secret = process.env.SESSION_SECRET;
