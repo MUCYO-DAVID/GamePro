@@ -120,6 +120,9 @@ async function loadBookings() {
     })
     .join("");
 
+  // Attach the click handler once (loadBookings runs again on every refresh)
+  if (wrap.dataset.bound) return;
+  wrap.dataset.bound = "1";
   wrap.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-action]");
     if (!btn) return;

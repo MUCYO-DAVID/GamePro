@@ -2,7 +2,6 @@ import "dotenv/config";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
@@ -10,17 +9,30 @@ import crypto from "crypto";
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
 import { sendBookingStatusEmail, sendPasswordResetEmail } from "./mailer.js";
-
-// Reuse one Prisma client per process (serverless functions on Vercel are reused between requests)
-const globalForPrisma = globalThis;
-const prisma = globalForPrisma.__gpPrisma ?? new PrismaClient();
-globalForPrisma.__gpPrisma = prisma;
+import { prisma } from "./lib/db.js";
+import {
+  verifySession,
+  setSessionCookie,
+  clearSessionCookie,
+  getAuthUser,
+  requireAuth,
+  requireAdmin
+} from "./lib/auth.js";
+import uploadsRouter from "./routes/uploads.js";
+import marketplaceRouter from "./routes/marketplace.js";
+import adsRouter from "./routes/ads.js";
+import adminMarketplaceRouter from "./routes/admin-marketplace.js";
+import adminAdsRouter from "./routes/admin-ads.js";
+import notificationsRouter from "./routes/notifications.js";
+import cronRouter from "./routes/cron.js";
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// Image uploads read the raw body, so they are mounted before the JSON parser
+app.use(uploadsRouter);
+app.use(express.json({ limit: "200kb" }));
+app.use(express.urlencoded({ extended: true }));
 
 // Block direct static access to admin.html — all admin requests must go through the /admin route
 app.get("/admin.html", (_req, res) => res.redirect(301, "/admin"));
@@ -52,65 +64,6 @@ app.get("/health", async (_req, res) => {
     res.status(503).json({ ok: false, db: "error", code: e?.errorCode || e?.code || null, hint });
   }
 });
-
-function getSessionSecret() {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret) throw new Error("SESSION_SECRET is required");
-  return secret;
-}
-
-function signSession(payload) {
-  const secret = getSessionSecret();
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = crypto.createHmac("sha256", secret).update(body).digest("base64url");
-  return `${body}.${sig}`;
-}
-
-function verifySession(token) {
-  if (!token) return null;
-  const secret = getSessionSecret();
-  const [body, sig] = token.split(".");
-  if (!body || !sig) return null;
-  const expected = crypto.createHmac("sha256", secret).update(body).digest("base64url");
-  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
-  try {
-    const json = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
-    return json;
-  } catch {
-    return null;
-  }
-}
-
-function setSessionCookie(res, payload) {
-  res.cookie("gp_session", signSession(payload), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 1000 * 60 * 60 * 24 * 7
-  });
-}
-
-function clearSessionCookie(res) {
-  res.clearCookie("gp_session", { path: "/" });
-}
-
-async function getAuthUser(req) {
-  const token = req.cookies?.gp_session;
-  if (!token) return null;
-  const session = verifySession(token);
-  if (!session?.userId) return null;
-  const user = await prisma.user.findUnique({ where: { id: session.userId } });
-  if (!user) return null;
-  return { user, session };
-}
-
-function requireAdmin(req, res, next) {
-  requireAuth(req, res, () => {
-    if (!req.auth?.user?.isAdmin) return res.status(403).json({ error: "Admin only" });
-    next();
-  });
-}
 
 function requireLoginToBookEnabled() {
   return String(process.env.REQUIRE_LOGIN_TO_BOOK || "false").toLowerCase() === "true";
@@ -186,19 +139,6 @@ app.get("/api/auth/me", async (req, res) => {
     twoFactorOk: !!session?.twoFactorOk
   });
 });
-
-function requireAuth(req, res, next) {
-  getAuthUser(req)
-    .then((auth) => {
-      if (!auth) return res.status(401).json({ error: "Unauthorized" });
-      if (auth.user.twoFactorOn && !auth.session?.twoFactorOk) {
-        return res.status(403).json({ error: "Two-factor required" });
-      }
-      req.auth = auth;
-      next();
-    })
-    .catch(next);
-}
 
 // 2FA: setup (returns QR data URL) + enable + verify at login
 app.post("/api/2fa/setup", requireAuth, async (req, res) => {
@@ -439,6 +379,14 @@ app.patch("/api/admin/bookings/:id", requireAdmin, async (req, res) => {
   res.json({ ...updated, emailResult });
 });
 
+// Marketplace, advertising, notifications, scheduled jobs
+app.use(marketplaceRouter);
+app.use(adsRouter);
+app.use(adminMarketplaceRouter);
+app.use(adminAdsRouter);
+app.use(notificationsRouter);
+app.use(cronRouter);
+
 // Simple routes to match your deployed URLs
 app.get("/", (_req, res) => res.sendFile(path.join(publicDir, "index.html")));
 app.get("/games", (_req, res) => res.sendFile(path.join(publicDir, "games.html")));
@@ -452,6 +400,24 @@ app.get("/admin", async (req, res) => {
   const auth = await getAuthUser(req);
   if (!auth?.user?.isAdmin) return res.redirect("/signin");
   res.sendFile(adminPage);
+});
+app.get("/marketplace", (_req, res) => res.sendFile(path.join(publicDir, "marketplace.html")));
+app.get("/marketplace/:id", (_req, res) => res.sendFile(path.join(publicDir, "product.html")));
+app.get("/sell", (_req, res) => res.sendFile(path.join(publicDir, "sell.html")));
+app.get("/advertise", (_req, res) => res.sendFile(path.join(publicDir, "advertise.html")));
+app.get("/notifications", (_req, res) => res.sendFile(path.join(publicDir, "notifications.html")));
+
+// Unknown API routes → JSON 404 (pages fall through to the default 404)
+app.use("/api", (_req, res) => res.status(404).json({ error: "Not found" }));
+
+// Last-resort error handler: log details server-side, never leak them to the browser
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, _next) => {
+  if (err?.type === "entity.too.large") return res.status(413).json({ error: "That file or request is too large" });
+  if (err?.type === "entity.parse.failed") return res.status(400).json({ error: "Invalid request body" });
+  console.error("[ERROR]", req.method, req.originalUrl, err);
+  if (res.headersSent) return;
+  res.status(500).json({ error: "Something went wrong. Please try again." });
 });
 
 export default app;

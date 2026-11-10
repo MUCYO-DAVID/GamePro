@@ -121,3 +121,37 @@ export async function sendBookingStatusEmail({ to, booking, gameTitle }) {
   }
 }
 
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// Generic notification email in the same style as the booking emails.
+// `lines` are plain text (escaped here); `link` is a site path like "/sell".
+export async function sendNotificationEmail({ to, subject, heading, lines = [], link, linkLabel }) {
+  const transporter = getTransporter();
+  if (!transporter) return { ok: false, skipped: true, reason: "SMTP not configured" };
+
+  const href = link ? `${baseUrl()}${link}` : baseUrl();
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.5; color:#111;">
+      <h2 style="margin:0 0 12px 0;">${escapeHtml(heading || subject)}</h2>
+      ${lines.map((l) => `<p style="margin:0 0 10px 0;">${escapeHtml(l)}</p>`).join("")}
+      <p style="margin:16px 0;">
+        <a href="${href}" style="background:#6c3fc5;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;">${escapeHtml(linkLabel || "Open GamePro")}</a>
+      </p>
+    </div>
+  `.trim();
+
+  try {
+    const info = await transporter.sendMail({ from: computeFrom(), to, subject, html });
+    return { ok: true, messageId: info?.messageId };
+  } catch (e) {
+    return { ok: false, error: "Email send failed", details: e?.message || String(e) };
+  }
+}

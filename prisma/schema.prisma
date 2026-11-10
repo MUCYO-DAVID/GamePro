@@ -3,25 +3,42 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   // Supabase: pooled connection for the app (port 6543), direct connection for migrations (port 5432)
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  name           String?
-  passwordHash   String
-  twoFactorKey   String?
-  twoFactorOn    Boolean  @default(false)
-  isAdmin        Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+// ─────────────────────────────────────────────────────────────
+// Accounts & bookings (existing)
+// ─────────────────────────────────────────────────────────────
 
-  bookings       Booking[]
-  resetTokens    PasswordResetToken[]
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  twoFactorKey String?
+  twoFactorOn  Boolean  @default(false)
+  isAdmin      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  bookings    Booking[]
+  resetTokens PasswordResetToken[]
+
+  sellerProfile    SellerProfile?
+  favorites        Favorite[]
+  inquiriesSent    ProductInquiry[]
+  reports          ProductReport[]  @relation("ReportedBy")
+  reviewedProducts Product[]        @relation("ProductReviewer")
+  ads              Ad[]             @relation("AdOwner")
+  reviewedAds      Ad[]             @relation("AdReviewer")
+  adPayments       AdPayment[]      @relation("PaymentPayer")
+  verifiedPayments AdPayment[]      @relation("PaymentVerifier")
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  uploads          Upload[]
 }
 
 model Game {
@@ -38,7 +55,7 @@ model Game {
 }
 
 model Booking {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   gameId    String
   userId    String?
   name      String
@@ -47,10 +64,10 @@ model Booking {
   date      DateTime
   notes     String?
   status    BookingStatus @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
-  game Game @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  game Game  @relation(fields: [gameId], references: [id], onDelete: Restrict)
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([gameId, date])
@@ -58,12 +75,12 @@ model Booking {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  tokenHash String   @unique
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -76,3 +93,405 @@ enum BookingStatus {
   CANCELLED
 }
 
+// ─────────────────────────────────────────────────────────────
+// Uploaded images (product photos, ad banners, logos)
+// Stored in Postgres by default, or in Supabase Storage when configured.
+// ─────────────────────────────────────────────────────────────
+
+model Upload {
+  id         String   @id @default(cuid())
+  ownerId    String?
+  mimeType   String
+  size       Int
+  data       Bytes? // set when stored in the database
+  storageKey String? // set when stored in Supabase Storage
+  createdAt  DateTime @default(now())
+
+  owner         User?          @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  productImages ProductImage[]
+  adBanners     Ad[]           @relation("AdBanner")
+  adLogos       Ad[]           @relation("AdLogo")
+
+  @@index([ownerId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Marketplace
+// ─────────────────────────────────────────────────────────────
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  icon      String   @default("fa-gamepad")
+  parentId  String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId, sortOrder])
+}
+
+model SellerProfile {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  displayName String
+  type        SellerType   @default(INDIVIDUAL)
+  phone       String
+  whatsapp    String?
+  location    String
+  bio         String?
+  status      SellerStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@index([status])
+}
+
+model Product {
+  id             String              @id @default(cuid())
+  sellerId       String
+  categoryId     String
+  title          String
+  description    String
+  price          Int // whole currency units (RWF has no cents)
+  currency       String              @default("RWF")
+  condition      ProductCondition
+  conditionNotes String? // scratches, defects, missing accessories (used items)
+  brand          String?
+  location       String
+  contactPhone   String
+  contactEmail   String?
+  specs          Json                @default("[]") // [{ label, value }]
+  quantity       Int                 @default(1)
+  availability   ProductAvailability @default(AVAILABLE)
+  status         ProductStatus       @default(PENDING_REVIEW)
+  declineReason  String?
+  viewCount      Int                 @default(0)
+  reviewedById   String?
+  reviewedAt     DateTime?
+  publishedAt    DateTime?
+  soldAt         DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  seller     SellerProfile    @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  category   Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  reviewedBy User?            @relation("ProductReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  images     ProductImage[]
+  favorites  Favorite[]
+  inquiries  ProductInquiry[]
+  reports    ProductReport[]
+  views      ProductView[]
+
+  @@index([status, categoryId])
+  @@index([status, price])
+  @@index([status, publishedAt])
+  @@index([sellerId, status])
+}
+
+model ProductImage {
+  id        String @id @default(cuid())
+  productId String
+  uploadId  String
+  position  Int    @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  upload  Upload  @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, uploadId])
+  @@index([productId, position])
+}
+
+model Favorite {
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([userId, productId])
+  @@index([productId])
+}
+
+model ProductInquiry {
+  id          String    @id @default(cuid())
+  productId   String
+  buyerId     String?
+  name        String
+  email       String?
+  phone       String?
+  message     String
+  visitorHash String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  buyer   User?   @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+
+  @@index([productId, createdAt])
+  @@index([visitorHash, createdAt])
+}
+
+model ProductReport {
+  id         String       @id @default(cuid())
+  productId  String
+  reporterId String?
+  reason     String
+  details    String?
+  status     ReportStatus @default(OPEN)
+  resolvedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reporter User?   @relation("ReportedBy", fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+}
+
+// One row per visitor per product per day, so refreshes don't inflate view counts
+model ProductView {
+  productId   String
+  visitorHash String
+  day         String // YYYY-MM-DD (UTC)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([productId, visitorHash, day])
+}
+
+enum SellerType {
+  INDIVIDUAL
+  STORE
+}
+
+enum SellerStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum ProductCondition {
+  NEW
+  USED
+}
+
+enum ProductAvailability {
+  AVAILABLE
+  RESERVED
+  OUT_OF_STOCK
+}
+
+enum ProductStatus {
+  PENDING_REVIEW
+  ACTIVE
+  DECLINED
+  SOLD
+  INACTIVE // hidden by the seller
+  REMOVED // taken down by an admin
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+// ─────────────────────────────────────────────────────────────
+// Paid advertising
+// ─────────────────────────────────────────────────────────────
+
+model AdPlacement {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. HOME_SIDEBAR
+  name        String
+  description String?
+  maxActive   Int      @default(3) // how many ads can show at once
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  packages AdPackage[]
+  ads      Ad[]
+}
+
+model AdPackage {
+  id           String   @id @default(cuid())
+  placementId  String
+  name         String
+  description  String?
+  durationDays Int
+  price        Int
+  currency     String   @default("RWF")
+  isFeatured   Boolean  @default(false) // promotional option: shown first + highlighted
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  placement AdPlacement @relation(fields: [placementId], references: [id], onDelete: Restrict)
+  ads       Ad[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Ad {
+  id                 String    @id @default(cuid())
+  userId             String
+  packageId          String?
+  placementId        String
+  businessName       String
+  contactName        String
+  email              String
+  phone              String
+  location           String?
+  title              String
+  message            String
+  ctaLabel           String    @default("Learn More")
+  linkUrl            String?
+  logoUploadId       String?
+  bannerUploadId     String?
+  preferredStartDate DateTime?
+  // Snapshot of the package at submission, so later price changes don't affect this ad
+  amount             Int
+  currency           String    @default("RWF")
+  durationDays       Int
+  isFeatured         Boolean   @default(false)
+  status             AdStatus  @default(DRAFT)
+  declineReason      String?
+  reviewedById       String?
+  reviewedAt         DateTime?
+  submittedAt        DateTime?
+  startsAt           DateTime?
+  endsAt             DateTime?
+  expiryWarnedAt     DateTime?
+  impressions        Int       @default(0)
+  clicks             Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user       User        @relation("AdOwner", fields: [userId], references: [id], onDelete: Cascade)
+  package    AdPackage?  @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  placement  AdPlacement @relation(fields: [placementId], references: [id], onDelete: Restrict)
+  reviewedBy User?       @relation("AdReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  logo       Upload?     @relation("AdLogo", fields: [logoUploadId], references: [id], onDelete: SetNull)
+  banner     Upload?     @relation("AdBanner", fields: [bannerUploadId], references: [id], onDelete: SetNull)
+  payments   AdPayment[]
+  events     AdEvent[]
+
+  @@index([status, placementId, endsAt])
+  @@index([userId, createdAt])
+}
+
+model AdPayment {
+  id                    String          @id @default(cuid())
+  adId                  String? // kept (null) if the ad is deleted, for revenue records
+  userId                String?
+  provider              PaymentProvider
+  txRef                 String          @unique // our reference, sent to the provider
+  providerTransactionId String?         @unique
+  amount                Int
+  currency              String
+  status                PaymentStatus   @default(PENDING)
+  method                String? // card, mobilemoney, ... (from provider)
+  payerReference        String? // manual payments: MoMo transaction ID typed by the payer
+  failureReason         String?
+  providerResponse      Json?
+  paidAt                DateTime?
+  verifiedById          String?
+  verifiedAt            DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  ad         Ad?   @relation(fields: [adId], references: [id], onDelete: SetNull)
+  user       User? @relation("PaymentPayer", fields: [userId], references: [id], onDelete: SetNull)
+  verifiedBy User? @relation("PaymentVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([adId, createdAt])
+  @@index([status, createdAt])
+}
+
+// One row per visitor per ad per day per event type: de-duplicated impressions and clicks
+model AdEvent {
+  adId        String
+  type        AdEventType
+  visitorHash String
+  day         String // YYYY-MM-DD (UTC)
+  createdAt   DateTime    @default(now())
+
+  ad Ad @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  @@id([adId, type, visitorHash, day])
+}
+
+enum AdStatus {
+  DRAFT
+  PENDING_PAYMENT
+  PAYMENT_PENDING_VERIFICATION
+  PENDING_APPROVAL
+  APPROVED // approved, waiting for a free slot in its placement
+  DECLINED
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+}
+
+enum PaymentProvider {
+  FLUTTERWAVE
+  MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum AdEventType {
+  IMPRESSION
+  CLICK
+}
+
+// ─────────────────────────────────────────────────────────────
+// Notifications & audit trail
+// ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String // e.g. product.approve, ad.decline, package.update
+  entityType String
+  entityId   String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

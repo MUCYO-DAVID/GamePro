@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img">
+  <rect width="400" height="300" fill="#16213E"/>
+  <circle cx="200" cy="150" r="118" fill="#1A1A2E" stroke="#7B2CBF" stroke-width="2" opacity="0.9"/>
+  <g fill="#7B2CBF" opacity="0.5"><circle cx="60" cy="60" r="3"/><circle cx="340" cy="60" r="3"/><circle cx="60" cy="240" r="3"/><circle cx="340" cy="240" r="3"/></g>
+  
+    <path d="M130 150 C110 105, 290 105, 270 150 S285 215, 250 215 S215 185, 200 185 S165 215, 150 215 S115 195, 130 150" fill="#7B2CBF" stroke="#9D4EDD" stroke-width="3"/>
+    <rect x="148" y="137" width="34" height="12" rx="3" fill="#1A1A2E"/><rect x="159" y="126" width="12" height="34" rx="3" fill="#1A1A2E"/>
+    <circle cx="245" cy="132" r="7" fill="#FF2E63"/><circle cx="231" cy="146" r="7" fill="#08D9D6"/><circle cx="259" cy="146" r="7" fill="#252A34"/><circle cx="245" cy="160" r="7" fill="#FF2E63"/>
+    <circle cx="180" cy="178" r="11" fill="#252A34" stroke="#9D4EDD" stroke-width="2"/><circle cx="220" cy="178" r="11" fill="#252A34" stroke="#9D4EDD" stroke-width="2"/>
+</svg>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications - GamePro</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/market.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container flex">
+        <a class="logo" href="/">GamePro</a>
+        <nav class="navbar">
+          <a href="/">Home</a>
+          <a href="/games">Games</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/booking">Book Now</a>
+          <a href="/signup">Sign Up</a>
+          <a href="/signin">Sign In</a>
+        </nav>
+        <button class="mobile-menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+      </div>
+    </header>
+
+    <main class="mk-page" style="max-width: 860px">
+      <div class="mk-head">
+        <div>
+          <h1>Notifications</h1>
+          <p>Updates about your listings, inquiries and advertisements.</p>
+        </div>
+        <div class="mk-head-actions">
+          <button class="btn gp-btn-ghost" id="mark-all" type="button" hidden><i class="fas fa-check-double"></i> Mark all as read</button>
+        </div>
+      </div>
+      <div id="list" class="gp-notes"><div class="mk-skel" style="height: 120px"></div></div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-bottom"><p>&copy; 2024 Kigali Game Center. All rights reserved.</p></div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/auth-ui.js"></script>
+    <script>
+      (function () {
+        const esc = GP.escapeHtml;
+        const list = document.getElementById("list");
+        const markAll = document.getElementById("mark-all");
+        const icons = { product: "fa-box", ad: "fa-bullhorn", seller: "fa-store" };
+        async function load() {
+          try {
+            const { items, unread } = await GP.api("/api/notifications");
+            markAll.hidden = !unread;
+            if (!items.length) {
+              list.innerHTML = GP.emptyState("fa-bell", "You're all caught up", "Notifications about your listings and advertisements will appear here.");
+              return;
+            }
+            list.innerHTML = items
+              .map((n) => {
+                const icon = icons[n.type.split(".")[0]] || "fa-bell";
+                const inner = `
+                  <div class="ic"><i class="fas ${icon}"></i></div>
+                  <div><h4>${esc(n.title)}</h4><p>${esc(n.body)}</p></div>
+                  <span class="gp-small">${esc(GP.timeAgo(n.createdAt))}</span>`;
+                return n.link && n.link.startsWith("/")
+                  ? `<a class="gp-note ${n.readAt ? "" : "unread"}" href="${esc(n.link)}" data-id="${esc(n.id)}">${inner}</a>`
+                  : `<div class="gp-note ${n.readAt ? "" : "unread"}" data-id="${esc(n.id)}">${inner}</div>`;
+              })
+              .join("");
+          } catch (e) {
+            if (e.status === 401) {
+              list.innerHTML = GP.emptyState("fa-user-lock", "Sign in to see your notifications", "", `<a class="btn btn-secondary" href="/signin?next=/notifications">Sign in</a>`);
+              return;
+            }
+            list.innerHTML = GP.emptyState("fa-triangle-exclamation", "Couldn't load notifications", e.message);
+          }
+        }
+        list.addEventListener("click", (e) => {
+          const n = e.target.closest(".gp-note.unread");
+          if (n) GP.api("/api/notifications/read", { method: "POST", body: { ids: [n.dataset.id] } }).catch(() => {});
+        });
+        markAll.addEventListener("click", async () => {
+          await GP.api("/api/notifications/read", { method: "POST", body: {} }).catch(() => {});
+          document.querySelector(".gp-bell .gp-badge")?.remove();
+          load();
+        });
+        load();
+      })();
+    </script>
+  </body>
+</html>

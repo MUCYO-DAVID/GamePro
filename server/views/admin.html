@@ -3,9 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin - Bookings - GamePro</title>
+    <title>Admin - GamePro</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/admin.css" />
+    <link rel="stylesheet" href="/css/market.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -18,6 +19,7 @@
         <nav class="navbar">
           <a href="/">Home</a>
           <a href="/games">Games</a>
+          <a href="/marketplace">Marketplace</a>
           <a href="/booking">Book Now</a>
         </nav>
         <button class="mobile-menu-btn" aria-label="Open menu">
@@ -28,57 +30,104 @@
 
     <main class="admin-hero">
       <div class="admin-wrap">
-        <div class="admin-header">
-          <div class="admin-title">
-            <h1>Bookings</h1>
-            <p>Review, confirm, or cancel customer bookings in real time.</p>
-          </div>
-          <div class="admin-stats" id="admin-stats" aria-label="Booking stats" style="display:none">
-            <div class="stat">
-              <div class="k">Total</div>
-              <div class="v" id="stat-total">—</div>
-            </div>
-            <div class="stat">
-              <div class="k">Pending</div>
-              <div class="v" id="stat-pending">—</div>
-            </div>
-            <div class="stat">
-              <div class="k">Confirmed</div>
-              <div class="v" id="stat-confirmed">—</div>
-            </div>
-          </div>
+        <div class="gp-tabs admin-sections" role="tablist" aria-label="Admin sections" style="display:none">
+          <button class="gp-tab" data-section="bookings" role="tab"><i class="fas fa-calendar-check"></i> Bookings</button>
+          <button class="gp-tab" data-section="marketplace" role="tab"><i class="fas fa-store"></i> Marketplace <span class="gp-count" id="mk-badge" hidden></span></button>
+          <button class="gp-tab" data-section="advertising" role="tab"><i class="fas fa-bullhorn"></i> Advertising <span class="gp-count" id="ad-badge" hidden></span></button>
+          <button class="gp-tab" data-section="activity" role="tab"><i class="fas fa-clock-rotate-left"></i> Activity</button>
         </div>
 
-        <div class="admin-toolbar">
-          <div id="admin-result" class="hint">Checking access…</div>
-          <div class="actions">
-            <button class="btn btn-admin btn-ghost" id="refresh-btn" type="button">
-              <i class="fas fa-rotate-right"></i> Refresh
-            </button>
+        <!-- Bookings (existing) -->
+        <section class="gp-panel" data-section-panel="bookings">
+          <div class="admin-header">
+            <div class="admin-title">
+              <h1>Bookings</h1>
+              <p>Review, confirm, or cancel customer bookings in real time.</p>
+            </div>
+            <div class="admin-stats" id="admin-stats" aria-label="Booking stats" style="display:none">
+              <div class="stat">
+                <div class="k">Total</div>
+                <div class="v" id="stat-total">—</div>
+              </div>
+              <div class="stat">
+                <div class="k">Pending</div>
+                <div class="v" id="stat-pending">—</div>
+              </div>
+              <div class="stat">
+                <div class="k">Confirmed</div>
+                <div class="v" id="stat-confirmed">—</div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <section class="admin-panel" id="admin-panel" aria-label="Bookings table" style="display:none">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th style="width: 28%">Game</th>
-                <th style="width: 18%">When</th>
-                <th style="width: 22%">Customer</th>
-                <th style="width: 12%">Status</th>
-                <th style="width: 20%; text-align: right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="bookings"></tbody>
-          </table>
-          <div id="admin-empty" class="admin-empty" style="display: none">No bookings yet.</div>
+          <div class="admin-toolbar">
+            <div id="admin-result" class="hint">Checking access…</div>
+            <div class="actions">
+              <button class="btn btn-admin btn-ghost" id="refresh-btn" type="button">
+                <i class="fas fa-rotate-right"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <section class="admin-panel" id="admin-panel" aria-label="Bookings table" style="display:none">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width: 28%">Game</th>
+                  <th style="width: 18%">When</th>
+                  <th style="width: 22%">Customer</th>
+                  <th style="width: 12%">Status</th>
+                  <th style="width: 20%; text-align: right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bookings"></tbody>
+            </table>
+            <div id="admin-empty" class="admin-empty" style="display: none">No bookings yet.</div>
+          </section>
+        </section>
+
+        <!-- Marketplace management -->
+        <section class="gp-panel" data-section-panel="marketplace" hidden>
+          <div class="admin-header">
+            <div class="admin-title">
+              <h1>Marketplace</h1>
+              <p>Approve listings, manage categories and sellers, and handle reports.</p>
+            </div>
+          </div>
+          <div id="mk-admin" style="margin-top:2rem"></div>
+        </section>
+
+        <!-- Advertising management -->
+        <section class="gp-panel" data-section-panel="advertising" hidden>
+          <div class="admin-header">
+            <div class="admin-title">
+              <h1>Advertising</h1>
+              <p>Review advertisements, verify payments, and set packages and prices.</p>
+            </div>
+          </div>
+          <div id="ad-admin" style="margin-top:2rem"></div>
+        </section>
+
+        <!-- Audit log -->
+        <section class="gp-panel" data-section-panel="activity" hidden>
+          <div class="admin-header">
+            <div class="admin-title">
+              <h1>Activity</h1>
+              <p>Every admin action on listings, sellers, advertisements, packages and payments.</p>
+            </div>
+          </div>
+          <div id="audit" style="margin-top:2rem"></div>
         </section>
       </div>
     </main>
 
     <script src="/js/script.js"></script>
+    <script src="/js/common.js"></script>
     <script src="/js/auth-ui.js"></script>
+    <script src="/js/ad-card.js"></script>
     <script src="/js/admin.js"></script>
+    <script src="/js/admin-market.js"></script>
+    <script src="/js/admin-ads.js"></script>
+    <script src="/js/admin-sections.js"></script>
   </body>
 </html>
-

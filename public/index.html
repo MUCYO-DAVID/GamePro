@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GamePro - Premier Gaming Destination</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/market.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -18,6 +19,7 @@
         <nav class="navbar">
           <a class="active" href="/">Home</a>
           <a href="/games">Games</a>
+          <a href="/marketplace">Marketplace</a>
           <a href="/booking">Book Now</a>
           <a href="/signup">Sign Up</a>
           <a href="/signin">Sign In</a>
@@ -31,6 +33,7 @@
       </section>
     </header>
 
+    <div class="home-layout">
     <section class="hero">
       <div class="hero-content">
         <h1>Welcome to the Ultimate Gaming Experience</h1>
@@ -45,10 +48,28 @@
       </div>
     </section>
 
+    <section class="promo-strip" aria-label="Marketplace">
+      <div class="promo-card">
+        <i class="fas fa-store" aria-hidden="true"></i>
+        <p>Looking for your next gaming setup? Discover new and used consoles, controllers, accessories, and more in our gaming marketplace.</p>
+        <a class="btn btn-secondary" href="/marketplace">Explore Marketplace</a>
+      </div>
+    </section>
+
+    <aside class="home-ads" aria-label="Sponsored">
+      <div class="home-ads-head" hidden><span>Sponsored</span></div>
+      <div class="home-ads-list" id="home-ads"></div>
+      <div class="advertise-blurb">
+        Want your gaming store or business to reach more gamers? Advertise with us and put your brand in front of our gaming community.
+        <a class="btn" href="/advertise">Advertise With Us</a>
+      </div>
+    </aside>
+
     <section class="games" id="games">
       <h2 class="section-title">Popular Games</h2>
       <div class="games-grid" id="popular-games"></div>
     </section>
+    </div>
 
     <footer class="footer">
       <div class="footer-content">
@@ -61,6 +82,8 @@
           <a href="/">Home</a>
           <a href="/games">Games</a>
           <a href="/booking">Book Now</a>
+          <a href="/marketplace">Marketplace</a>
+          <a href="/advertise">Advertise With Us</a>
         </div>
         <div class="footer-section">
           <h3>Connect With Us</h3>
@@ -95,8 +118,11 @@
     </footer>
 
     <script src="/js/script.js"></script>
+    <script src="/js/common.js"></script>
     <script src="/js/auth-ui.js"></script>
     <script src="/js/home.js"></script>
+    <script src="/js/ad-card.js"></script>
+    <script src="/js/home-ads.js"></script>
   </body>
 </html>
 

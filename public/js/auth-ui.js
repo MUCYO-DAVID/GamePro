@@ -32,7 +32,49 @@ function ensureLink(href, text, extraAttrs = {}) {
   return a;
 }
 
+// Make sure every page's nav has the Marketplace link, right after "Games"
+function ensureMarketplaceLink() {
+  const nav = document.querySelector(".navbar");
+  if (!nav || nav.querySelector('a[href="/marketplace"]')) return;
+  const a = document.createElement("a");
+  a.href = "/marketplace";
+  a.textContent = "Marketplace";
+  if (location.pathname.startsWith("/marketplace") || location.pathname === "/sell") a.className = "active";
+  const games = nav.querySelector('a[href="/games"]');
+  if (games) games.after(a);
+  else nav.appendChild(a);
+}
+
+// Bell icon with unread count for signed-in users
+async function addNotificationBell() {
+  const nav = document.querySelector(".navbar");
+  if (!nav || nav.querySelector(".gp-bell")) return;
+  const a = document.createElement("a");
+  a.href = "/notifications";
+  a.className = "gp-bell";
+  a.setAttribute("aria-label", "Notifications");
+  a.innerHTML = '<i class="fas fa-bell"></i>';
+  const signout = nav.querySelector('a[href="#signout"]');
+  if (signout) signout.before(a);
+  else nav.appendChild(a);
+  try {
+    const res = await fetch("/api/notifications/unread-count");
+    if (!res.ok) return;
+    const { unread } = await res.json();
+    if (unread > 0) {
+      const b = document.createElement("span");
+      b.className = "gp-badge";
+      b.textContent = unread > 99 ? "99+" : String(unread);
+      a.appendChild(b);
+      a.setAttribute("aria-label", `Notifications (${unread} unread)`);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  ensureMarketplaceLink();
   const me = await getMe();
   const user = me?.user || null;
 
@@ -59,6 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (user.isAdmin) {
       ensureLink("/admin", "Admin");
     }
+    addNotificationBell();
   } else {
     if (signup) signup.style.display = "";
     if (signin) signin.style.display = "";

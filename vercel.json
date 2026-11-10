@@ -3,24 +3,84 @@
   "framework": null,
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "public",
-  "regions": ["cdg1"],
+  "regions": [
+    "cdg1"
+  ],
   "functions": {
     "api/index.js": {
       "includeFiles": "server/views/**"
     }
   },
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" },
-    { "source": "/admin", "destination": "/api" },
-    { "source": "/admin.html", "destination": "/api" },
-    { "source": "/health", "destination": "/api" },
-
-    { "source": "/games", "destination": "/games.html" },
-    { "source": "/booking", "destination": "/booking.html" },
-    { "source": "/signup", "destination": "/signup.html" },
-    { "source": "/signin", "destination": "/signin.html" },
-    { "source": "/2fa", "destination": "/twofa.html" },
-    { "source": "/forgot-password", "destination": "/forgot-password.html" },
-    { "source": "/reset-password", "destination": "/reset-password.html" }
+    {
+      "source": "/api/:path*",
+      "destination": "/api"
+    },
+    {
+      "source": "/admin",
+      "destination": "/api"
+    },
+    {
+      "source": "/admin.html",
+      "destination": "/api"
+    },
+    {
+      "source": "/health",
+      "destination": "/api"
+    },
+    {
+      "source": "/games",
+      "destination": "/games.html"
+    },
+    {
+      "source": "/booking",
+      "destination": "/booking.html"
+    },
+    {
+      "source": "/signup",
+      "destination": "/signup.html"
+    },
+    {
+      "source": "/signin",
+      "destination": "/signin.html"
+    },
+    {
+      "source": "/2fa",
+      "destination": "/twofa.html"
+    },
+    {
+      "source": "/forgot-password",
+      "destination": "/forgot-password.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/reset-password.html"
+    },
+    {
+      "source": "/marketplace",
+      "destination": "/marketplace.html"
+    },
+    {
+      "source": "/marketplace/:id",
+      "destination": "/product.html"
+    },
+    {
+      "source": "/sell",
+      "destination": "/sell.html"
+    },
+    {
+      "source": "/advertise",
+      "destination": "/advertise.html"
+    },
+    {
+      "source": "/notifications",
+      "destination": "/notifications.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/daily",
+      "schedule": "0 5 * * *"
+    }
   ]
 }

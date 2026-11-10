@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const result = document.getElementById("signin-result");
   if (!form) return;
 
+  // Optional ?next=/path to return to after signing in (same-site paths only)
+  const rawNext = new URLSearchParams(window.location.search).get("next") || "";
+  const safeNext = rawNext.startsWith("/") && !rawNext.startsWith("//") && !rawNext.startsWith("/\\") ? rawNext : "";
+
   async function fetchMe() {
     const res = await fetch("/api/auth/me");
     if (!res.ok) return null;
@@ -27,12 +31,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (data.requiresTwoFactor) {
         const me = await fetchMe();
-        const next = me?.user?.isAdmin ? "/admin" : "/";
+        const next = safeNext || (me?.user?.isAdmin ? "/admin" : "/");
         result.textContent = "2FA required. Redirecting…";
         window.location.href = `/2fa?next=${encodeURIComponent(next)}#verify`;
       } else {
         const me = await fetchMe();
-        if (me?.user?.isAdmin) {
+        if (safeNext) {
+          result.textContent = "Signed in. Redirecting…";
+          window.location.href = safeNext;
+        } else if (me?.user?.isAdmin) {
           result.textContent = "Signed in as admin. Redirecting…";
           window.location.href = "/admin";
         } else {

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marketplace - GamePro</title>
+    <meta name="description" content="Buy and sell new and used consoles, controllers, gaming accessories and equipment in Kigali." />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/market.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container flex">
+        <a class="logo" href="/">GamePro</a>
+        <nav class="navbar">
+          <a href="/">Home</a>
+          <a href="/games">Games</a>
+          <a class="active" href="/marketplace">Marketplace</a>
+          <a href="/booking">Book Now</a>
+          <a href="/signup">Sign Up</a>
+          <a href="/signin">Sign In</a>
+        </nav>
+        <button class="mobile-menu-btn" aria-label="Open menu"><span></span><span></span><span></span></button>
+      </div>
+    </header>
+
+    <main class="mk-page">
+      <div class="mk-head">
+        <div>
+          <h1>Gaming Marketplace</h1>
+          <p>New and used consoles, controllers, accessories and gaming gear from gamers and stores in Kigali.</p>
+        </div>
+        <div class="mk-head-actions">
+          <a class="btn gp-btn-ghost" href="/marketplace?favorites=1" id="saved-link"><i class="far fa-heart"></i> Saved</a>
+          <a class="btn btn-secondary" href="/sell"><i class="fas fa-plus"></i> Sell an item</a>
+        </div>
+      </div>
+
+      <div class="mk-cats" id="cats" role="tablist" aria-label="Categories"></div>
+
+      <div class="mk-layout">
+        <aside class="mk-filters gp-card" id="filters" aria-label="Filters">
+          <h3>Filters <button type="button" class="gp-icon-btn" id="clear-filters" title="Clear filters"><i class="fas fa-rotate-left"></i></button></h3>
+          <form id="filter-form" class="gp-form">
+            <div class="gp-field">
+              <label for="f-sub">Category</label>
+              <select id="f-sub" name="category"><option value="">All categories</option></select>
+            </div>
+            <div class="gp-field">
+              <label>Condition</label>
+              <div class="gp-choice">
+                <label><input type="radio" name="condition" value="" checked /><span>Any</span></label>
+                <label><input type="radio" name="condition" value="NEW" /><span>New</span></label>
+                <label><input type="radio" name="condition" value="USED" /><span>Used</span></label>
+              </div>
+            </div>
+            <div class="gp-field">
+              <label>Price (RWF)</label>
+              <div class="mk-price-row">
+                <input type="number" min="0" step="1000" name="minPrice" placeholder="Min" aria-label="Minimum price" />
+                <input type="number" min="0" step="1000" name="maxPrice" placeholder="Max" aria-label="Maximum price" />
+              </div>
+            </div>
+            <div class="gp-field">
+              <label for="f-loc">Location</label>
+              <input id="f-loc" name="location" list="loc-list" placeholder="e.g. Kicukiro" />
+              <datalist id="loc-list"></datalist>
+            </div>
+            <button class="btn btn-secondary" type="submit" style="width: 100%">Apply filters</button>
+          </form>
+        </aside>
+
+        <section>
+          <div class="mk-toolbar">
+            <form class="mk-search" id="search-form" role="search">
+              <i class="fas fa-magnifying-glass"></i>
+              <input id="q" name="q" type="search" placeholder="Search PS5, DualSense, gaming chair…" aria-label="Search the marketplace" />
+            </form>
+            <select id="sort" aria-label="Sort by">
+              <option value="newest">Newest first</option>
+              <option value="price_asc">Lowest price</option>
+              <option value="price_desc">Highest price</option>
+            </select>
+            <button type="button" class="btn gp-btn-ghost mk-filter-toggle" id="filter-toggle"><i class="fas fa-sliders"></i> Filters</button>
+          </div>
+          <div class="mk-result-count" id="result-count"></div>
+          <div class="mk-grid" id="grid" aria-live="polite"></div>
+          <div class="mk-pager" id="pager"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-bottom"><p>&copy; 2024 Kigali Game Center. All rights reserved.</p></div>
+    </footer>
+
+    <script src="/js/script.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/auth-ui.js"></script>
+    <script src="/js/market-card.js"></script>
+    <script src="/js/marketplace.js"></script>
+  </body>
+</html>
