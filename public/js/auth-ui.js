@@ -120,3 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+// Keep the footer copyright year current
+document.querySelectorAll(".gp-year").forEach((el) => {
+  el.textContent = String(new Date().getFullYear());
+});

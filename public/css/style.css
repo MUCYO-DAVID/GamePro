@@ -1497,3 +1497,9 @@ header .flex .btn{
     color: #4facfe;
     font-weight: 600;
 }
+
+.footer-bottom p.footer-credit {
+    font-size: 1.1rem;
+    margin-top: .4rem;
+    opacity: .7;
+}
