@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -124,7 +125,27 @@ const games = [
   }
 ];
 
+// Admin account comes from .env (ADMIN_EMAIL / ADMIN_PASSWORD) so the password never lands in git.
+// Creates the admin if missing; if the account already exists it is only marked as admin
+// (its password is left alone, so a password changed via "Forgot password" is not overwritten).
+async function seedAdmin() {
+  const email = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
+  const password = process.env.ADMIN_PASSWORD || "";
+  if (!email || !password) {
+    console.log("Admin: skipped (set ADMIN_EMAIL and ADMIN_PASSWORD in .env)");
+    return;
+  }
+  const passwordHash = await bcrypt.hash(password, 12);
+  await prisma.user.upsert({
+    where: { email },
+    update: { isAdmin: true },
+    create: { email, name: "GamePro Admin", passwordHash, isAdmin: true }
+  });
+  console.log(`Admin: ${email} ready`);
+}
+
 async function main() {
+  await seedAdmin();
   for (const game of games) {
     await prisma.game.upsert({
       where: { slug: game.slug },
