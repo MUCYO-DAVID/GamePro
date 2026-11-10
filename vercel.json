@@ -3,6 +3,7 @@
   "framework": null,
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "public",
+  "regions": ["cdg1"],
   "functions": {
     "api/index.js": {
       "includeFiles": "server/views/**"
