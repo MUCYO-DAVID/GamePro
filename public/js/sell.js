@@ -467,7 +467,7 @@
       try {
         const r = await GP.api("/api/seller/profile", { method: "PUT", body });
         profile = r.profile;
-        GP.toast("Profile saved", "success");
+        GP.toast(r.listingsUpdated ? `Profile saved. Phone updated on ${r.listingsUpdated} listing(s).` : "Profile saved", "success");
         if (first) {
           tab = "new";
           await refresh();

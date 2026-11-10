@@ -399,8 +399,15 @@ router.put("/api/seller/profile", requireAuth, async (req, res) => {
   const data = parseBody(sellerSchema, req, res);
   if (!data) return;
   const userId = req.auth.user.id;
+  const before = await prisma.sellerProfile.findUnique({ where: { userId }, select: { phone: true } });
   const profile = await prisma.sellerProfile.upsert({ where: { userId }, update: data, create: { ...data, userId } });
-  res.json({ profile });
+  // Listings that used the old profile phone follow the new one, so a number only has to be changed once
+  let listingsUpdated = 0;
+  if (before && before.phone !== profile.phone) {
+    const r = await prisma.product.updateMany({ where: { sellerId: profile.id, contactPhone: before.phone }, data: { contactPhone: profile.phone } });
+    listingsUpdated = r.count;
+  }
+  res.json({ profile, listingsUpdated });
 });
 
 async function requireSeller(req, res) {
